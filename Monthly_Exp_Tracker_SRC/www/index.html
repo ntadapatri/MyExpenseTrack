@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src  'self' 'unsafe-inline' *">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+  <title></title>
+
+  <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
+  <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+  <script src="https://maps-api-ssl.google.com/maps/api/js?libraries=places"></script>
+  <!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDk_iQ6QWOTHW-TWoXSFLwbcnhaxlcnXXk&libraries=places&sensor=true"></script>-->
+
+  <!-- Scripts -->
+  <script src="js/ng-cordova.min.js"></script>
+  <script src="cordova.js"></script>
+
+
+  <!--Firebase-->
+  <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+
+  <!-- AngularFire -->
+  <script src="https://cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
+
+  <script src="locator/locator.min.js"></script>
+  <script src="locator/locator-tpl.js"></script>
+  <script src="js/Chart.min.js"></script>
+  <script src="js/angular-chart.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/appservices.js"></script>
+  <script src="js/appservicesgeo.js"></script>
+
+
+
+  <!--<script src="js/appmodal.js"></script>-->
+</head>
+
+<body ng-app="todo" ng-controller="glistCtrl">
+  <ion-side-menus>
+    <ion-side-menu-content>
+      <ion-nav-bar class="bar-positive" align-title="center"></ion-nav-bar>
+      <ion-nav-view ></ion-nav-view>
+    </ion-side-menu-content>
+
+  <ion-side-menu side="left">
+    <ion-header-bar class="bar bar-header bar-dark"></ion-header-bar>
+    <ion-content>
+      <ion-list>
+        <ion-item href="#/profile" menu-toggle=""> My Profile </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/fixedexp" menu-toggle=""> Fixed Expenses </ion-item>
+      </ion-list>
+      <ion-item href="#/creditcard" menu-toggle=""> Credit Card </ion-item>
+      <ion-list>
+        <ion-item href="#/fuel" menu-toggle=""> Fuel </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/grocery" menu-toggle=""> Grocery </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/park" menu-toggle=""> Parking </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/shop" menu-toggle=""> Shopping </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/ent" menu-toggle=""> Entertainment </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/misc" menu-toggle=""> Miscellaneous </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/history" menu-toggle=""> History </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-item href="#/stats" menu-toggle=""> Statistics </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-side-menu>
+
+</ion-side-menus>
+
+<script id="dashboard.html" type="text/ng-template">
+  <ion-view view-title="KOSTEN SPUR">
+
+    <ion-nav-buttons side="right">
+      <a class="button button-icon button-clear ion-android-person pull-right" href="#/profile"></a>
+    </ion-nav-buttons>
+
+    <ion-content class="padding" overflow-scroll='true'>
+      <h2 style="text-align: center; color: #0c60ee;font-family: 'Franklin Gothic Medium';" >Dashboard : <span ng-bind="date | date:'MMMM yyyy'"></span> </h2>
+
+      <ion-item>
+       <h3 style=""> Current expenditure <span class="item-note"> {{getTotal()}} &euro; </span> </h3>
+
+      </ion-item>
+
+      <ion-item style="height: auto">
+      <h3 style=""> Target expenditure <span class="item-note"> {{getTargetInfo()}} &euro; </span> </h3>
+      </ion-item>
+
+      <h4 ng-if="avail" contenteditable style="text-align: center">
+       Set your target budget
+      </h4>
+      <h4 ng-if="editMode && !avail" contenteditable style="text-align: center">
+        You are operating within budget <i class="icon ion-android-happy balanced"></i>
+      </h4>
+      <h4 ng-if="!editMode && !avail" style="text-align: center">
+        You have exceeded your budget! <i class="icon ion-android-sad assertive"> </i>
+      </h4>
+
+
+      <ion-item>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/fixedexp">Fixed Expenses</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+             Items: {{getFECount()}}
+            </div>
+            <div class="col" align="right">
+              {{getFETotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger;color: #fafafa;text-decoration: none;" href="#/creditcard">Credit Card</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getCCCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getCCTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/fuel">Fuel</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getFuelCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getFuelTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/grocery">Grocery</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getGroceryCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getGroceryTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/park">Parking</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getParkCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getParkTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/shop">Shopping</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getShopCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getShopTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/ent">Entertainment</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getEntCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getEntTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #4b8bf4">
+            <a class="button-full button-calm" style="font-family: 'Comic Sans MS'; font-size: larger; color: #fafafa;text-decoration: none;" href="#/misc">Miscellaneous</a>
+          </div>
+          <div class="row">
+            <div class="col" align="left">
+              Items: {{getMiscCount()}}
+            </div>
+            <div class="col" align="right">
+              {{getMiscTotal()}} &euro;
+            </div>
+          </div>
+        </div>
+      </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-view>
+  <ion-footer-bar class="bar-positive">
+    <a class="button button-icon icon ion-ios-clock icon-left" href="#/history"></a>
+    <a class="button button-icon icon ion-stats-bars pull-right" href="#/stats"></a>
+  </ion-footer-bar>
+
+</script>
+
+<script id="fixedexp.html" type="text/ng-template">
+  <ion-view view-title="Monthly Expenses Tracker">
+    <ion-nav-buttons side="left">
+      <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+      <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+    </ion-nav-buttons>
+
+    <ion-content class="padding" overflow-scroll='true'>
+      <ion-refresher
+        pulling-text="Pull to refresh..."
+        on-refresh="refreshTasks()">
+      </ion-refresher>
+      <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large; color: #4b8bf4; font-weight: bolder;"> Fixed Expenses </h2><br/>
+
+      <ion-list show-delete="data.showDelete">
+
+        <ion-item ng-show="!expensee.length">
+          No expense categories
+        </ion-item>
+
+        <ion-item ng-show="expensee.length" collection-repeat="task in expensee|filter:{exp_category:'Fixed Expense'}" item="task"">
+
+          {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+        </ion-item>
+      </ion-list>
+      <ion-infinite-scroll
+        on-infinite="loadMore()"
+        distance="1%">
+      </ion-infinite-scroll>
+    </ion-content>
+  </ion-view>
+
+  <ion-footer-bar class="bar-positive">
+    <button class="button button-icon icon ion-ios-minus-outline"
+            ng-click="data.showDelete = !data.showDelete"></button>
+    <!-- New Task button-->
+    <button class="button button-icon pull-right" ng-click="newTask()">
+      <i class="icon ion-compose"></i>
+    </button>
+  </ion-footer-bar>
+</script>
+
+  <script id="new-fixedexpense-category.html" type="text/ng-template">
+
+    <div class="modal">
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Fixed Expense</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createFixedExpense(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense name" ng-model="task.title">
+            </label>
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Create Expense</button>
+          </div>
+        </form>
+      </ion-content>
+    </div>
+
+  </script>
+
+<script id="creditcard.html" type="text/ng-template">
+
+  <ion-view view-title="Monthly Expenses Tracker">
+
+    <ion-nav-buttons side="left">
+      <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+      <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+    </ion-nav-buttons>
+
+    <ion-content class="padding">
+      <h2 style="text-align: center; font-family: 'Lucida Calligraphy';font-size: xx-large; color: #4b8bf4; font-weight: bolder;"> Credit Card Expenses </h2><br/>
+
+      <ion-list show-delete="data.showDelete">
+
+        <ion-item>
+
+          <div class="row">
+            <div class="col col-50">
+              <label class="item-input-wrapper">
+                <input type="text" style="background: transparent" placeholder="Card Name" ng-model="task.title">
+              </label>
+            </div>
+
+            <div class="col col-50">
+              <label class="item-input-wrapper">
+                <input type="text" style="background: transparent" placeholder="Amount" ng-model="task.amount">
+              </label>
+            </div>
+
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <button class="button button-calm button-full" ng-click="createCreditCard(task)">
+                Submit
+              </button>
+            </div>
+          </div>
+        </ion-item>
+
+        <ion-item ng-show="!expensee.length">
+          No expense categories
+        </ion-item>
+
+        <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Credit Card'}" item="task"">
+
+        {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+        <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id)"></ion-delete-button>
+        <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+        </ion-item>
+      </ion-list>
+
+    </ion-content>
+
+  </ion-view>
+
+  <ion-footer-bar class="bar-positive">
+    <button class="button button-icon icon ion-ios-minus-outline"
+            ng-click="data.showDelete = !data.showDelete"></button>
+  </ion-footer-bar>
+</script>
+
+<script id="fuel.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+        <h2 style="text-align: center; font-family: 'Lucida Calligraphy';font-size: xx-large; color: #4b8bf4; font-weight: bolder;"> Fuel Expenses </h2><br/>
+        <ion-list show-delete="data.showDelete">
+
+          <ion-item ng-show="!expensee.length">
+            No expense categories
+          </ion-item>
+
+          <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Fuel'}" item="task">
+          {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id)"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+          </ion-item>
+        </ion-list>
+      </ion-content>
+      <ion-footer-bar class="bar-positive">
+        <button class="button button-icon icon ion-ios-minus-outline"
+                ng-click="data.showDelete = !data.showDelete"></button>
+        <!-- New Task button-->
+        <button class="button button-icon pull-right" ng-click="newTask()">
+          <i class="icon ion-compose"></i>
+        </button>
+      </ion-footer-bar>
+    </ion-view>
+</script>
+
+<script id="new-fuel-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Expense</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createFuel(task)">
+          <div class="list">
+
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Create Expense</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+</script>
+
+
+  <script id="grocery.html" type="text/ng-template">
+  <ion-view view-title="Monthly Expenses Tracker">
+    <ion-nav-buttons side="left">
+      <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+      <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+    </ion-nav-buttons>
+    <ion-content class="padding">
+      <h2 style="text-align: center; font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;">Grocery Expenses</h2>
+      <a class="button button-full button-positive" href="#/glist">
+
+            <i class="ion-android-clipboard"></i>&nbsp;
+            Grocery list
+
+      </a>
+      <ion-list show-delete="data.showDelete">
+
+        <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Grocery'}" item="task"">
+
+        {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+        <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id)"></ion-delete-button>
+        <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-view>
+
+  <ion-footer-bar class="bar-positive">
+    <button class="button button-icon icon ion-ios-minus-outline"
+            ng-click="data.showDelete = !data.showDelete"></button>
+
+    <button class="button button-icon pull-right" ng-click="newTask()">
+      <i class="icon ion-compose"></i>
+    </button>
+  </ion-footer-bar>
+
+  </script>
+
+
+<script id="new-grocery-category.html" type="text/ng-template">
+  <div class="modal">
+
+    <!-- Modal header bar -->
+    <ion-header-bar class="bar-stable">
+      <h1 class="title">New Expense</h1>
+      <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+    </ion-header-bar>
+
+    <!-- Modal content area -->
+    <ion-content>
+
+      <form ng-submit="createGrocery(task)">
+        <div class="list">
+
+          <label class="item item-input">
+            <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+          </label>
+        </div>
+        <div class="padding">
+          <button type="submit" class="button button-block button-positive">Create Expense</button>
+        </div>
+      </form>
+
+    </ion-content>
+  </div>
+</script>
+
+  <script id="park.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+        <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> Parking </h2><br/>
+        <ion-list show-delete="data.showDelete">
+
+          <ion-item ng-show="!expensee.length">
+            No expense categories
+          </ion-item>
+
+          <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Parking'}" item="task"">
+
+          {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+
+          </ion-item>
+        </ion-list>
+      </ion-content>
+
+      <ion-footer-bar class="bar-positive">
+        <button class="button button-icon icon ion-ios-minus-outline"
+                ng-click="data.showDelete = !data.showDelete"></button>
+        <!-- New Task button-->
+        <button class="button button-icon pull-right" ng-click="newTask()">
+          <i class="icon ion-compose"></i>
+        </button>
+      </ion-footer-bar>
+
+    </ion-view>
+  </script>
+
+
+  <script id="new-parking-category.html" type="text/ng-template">
+  <div class="modal">
+
+    <!-- Modal header bar -->
+    <ion-header-bar class="bar-stable">
+      <h1 class="title">New Expense</h1>
+      <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+    </ion-header-bar>
+
+    <!-- Modal content area -->
+    <ion-content>
+
+      <form ng-submit="createParking(task)">
+        <div class="list">
+
+          <label class="item item-input">
+            <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+          </label>
+        </div>
+        <div class="padding">
+          <button type="submit" class="button button-block button-positive">Create Expense</button>
+        </div>
+      </form>
+
+    </ion-content>
+  </div>
+</script>
+
+
+  <script id="shop.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+          <h2 style="text-align: center; font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> Shopping Expenses </h2><br/>
+          <ion-list show-delete="data.showDelete">
+
+            <ion-item ng-show="!expensee.length">
+              No expense categories
+            </ion-item>
+
+            <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Shopping'}" item="task"">
+
+            {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+            <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+            <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+
+            </ion-item>
+          </ion-list>
+        </ion-content>
+
+        <ion-footer-bar class="bar-positive">
+          <button class="button button-icon icon ion-ios-minus-outline"
+                  ng-click="data.showDelete = !data.showDelete"></button>
+          <!-- New Task button-->
+          <button class="button button-icon pull-right" ng-click="newTask()">
+            <i class="icon ion-compose"></i>
+          </button>
+        </ion-footer-bar>
+    </ion-view>
+  </script>
+
+  <script id="new-shopping-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Expense</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createShopping(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense name" ng-model="task.title">
+            </label>
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Create Expense</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+  </script>
+
+  <script id="ent.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+        <h2 style="text-align: center;color: orangered;font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> Entertainment Expenses</h2><br/>
+        <ion-list show-delete="data.showDelete">
+
+          <ion-item ng-show="!expensee.length">
+            No expense categories
+          </ion-item>
+
+          <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Entertainment'}" item="task"">
+
+          {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+
+          </ion-item>
+        </ion-list>
+      </ion-content>
+
+      <ion-footer-bar class="bar-positive">
+        <button class="button button-icon icon ion-ios-minus-outline"
+                ng-click="data.showDelete = !data.showDelete"></button>
+        <!-- New Task button-->
+        <button class="button button-icon pull-right" ng-click="newTask()">
+          <i class="icon ion-compose"></i>
+        </button>
+      </ion-footer-bar>
+    </ion-view>
+  </script>
+
+  <script id="new-ent-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Expense</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createEnt(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense name" ng-model="task.title">
+            </label>
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Create Expense</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+  </script>
+
+
+  <script id="misc.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+        <h2 style="text-align: center;color: teal;font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> Miscellaneous Expenses</h2><br/>
+        <ion-list show-delete="data.showDelete">
+
+          <ion-item ng-show="!expensee.length">
+            No expense categories
+          </ion-item>
+
+          <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Miscellaneous'}" item="task"">
+
+          {{task.exp_name}} <span class="item-note"> {{task.exp_amt}}</span>
+
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+
+          </ion-item>
+        </ion-list>
+      </ion-content>
+
+      <ion-footer-bar class="bar-positive">
+        <button class="button button-icon icon ion-ios-minus-outline"
+                ng-click="data.showDelete = !data.showDelete"></button>
+        <!-- New Task button-->
+        <button class="button button-icon pull-right" ng-click="newTask()">
+          <i class="icon ion-compose"></i>
+        </button>
+      </ion-footer-bar>
+    </ion-view>
+  </script>
+
+  <script id="new-misc-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Expense</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createMisc(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense name" ng-model="task.title">
+            </label>
+            <label class="item item-input">
+              <input type="text" placeholder="Enter expense amount" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Create Expense</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+  </script>
+
+
+  <script id="history.html" type="text/ng-template">
+  <ion-view view-title="Monthly Expenses Tracker">
+    <ion-nav-buttons side="left">
+      <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+      <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+    </ion-nav-buttons>
+
+    <ion-content class="padding">
+      <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> History </h2><br/>
+
+      <ion-item>
+      <div class="row">
+      <div class="col col-50">
+
+
+            <select style="width: 640px;max-width:100%;" ng-model="mySelectMon" ng-change="showSelectMon(mySelectMon)">
+              <option value="">Select Month</option>
+              <option data-ng-repeat="item in monthArrs" value="{{item}}">{{item}}</option>
+
+            </select>
+
+      </div>
+        <div class="col col-50">
+
+            <select style="width: 640px;max-width:100%;" ng-model="mySelectYr" ng-change="showSelectYr(mySelectYr)">
+              <option value="">Select Year</option>
+              <option data-ng-repeat="item in yearArrs" value="{{item}}">{{item}}</option>
+
+            </select>
+
+        </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+        <button type="submit" class="button button-calm button-full" ng-click="sample()">Submit</button>
+         </div>
+        </div>
+
+        <div class="row">
+        <div class="col">
+        <div class="card">
+          <div class="item item-divider">
+            Expenditure report
+          </div>
+          <div class="item item-text-wrap">
+            <div ng-repeat="exp in expCats">
+              {{exp}} <span class="item-note">  {{outputArr[$index]}}</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      </div>
+
+     </div>
+     </ion-item>
+    </ion-content>
+  </ion-view>
+</script>
+
+<script id="stats.html" type="text/ng-template">
+  <ion-view view-title="Monthly Expenses Tracker">
+    <ion-nav-buttons side="left">
+      <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+      <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+    </ion-nav-buttons>
+
+    <ion-content class="padding">
+      <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large; color: #4b8bf4; font-weight: bolder;"> Statistics </h2><br/>
+
+        <div class="card">
+          <div class="item item-divider">
+           Your expenditure
+          </div>
+          <div class="item item-text-wrap">
+            <canvas id="line" class="chart chart-line" data="data" labels="labels" legend="true"  options="{showTooltips: false}"></canvas>
+          </div>
+        </div>
+
+      <div class="card">
+        <div class="item item-divider">
+          Expenditure report
+        </div>
+        <div class="item item-text-wrap">
+          <div ng-repeat="label in labels">
+            {{label}} <span class="item-note">  {{data[0][$index]}}</span>
+          </div>
+
+        </div>
+
+      </div>
+    </ion-content>
+
+  </ion-view>
+</script>
+
+  <script id="grocerylist.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+      <ion-content class="padding">
+        <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large;color: #4b8bf4; font-weight: bolder;"> Grocery list </h2><br/>
+        <ion-list show-delete="data.showDelete">
+          <ion-item
+
+            ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'List'}">
+
+
+          <div class="row">
+                <div class="col text-left">
+                  {{ task.exp_name }}
+                </div>
+                <div class="col text-right">
+                  <button class="button-stable button-dark ion-android-checkmark-circle" ng-click="onItemDone(task.exp_id)"> </button>
+                </div>
+              </div>
+
+          <ion-delete-button class="ion-minus-circled" ng-click="onItemDelete(task.exp_id);data.showDelete = !data.showDelete"></ion-delete-button>
+          <ion-option-button class="button-assertive" ng-click="onItemEdit(task.exp_id)">Edit</ion-option-button>
+
+      </ion-item>
+      </ion-list>
+      </ion-content>
+
+      <ion-footer-bar class="bar-positive">
+        <button class="button button-icon icon ion-ios-minus-outline"
+                ng-click="data.showDelete = !data.showDelete"></button>
+        <!-- New Task button-->
+        <button class="button button-icon pull-right" ng-click="newTask()">
+          <i class="icon ion-compose"></i>
+        </button>
+      </ion-footer-bar>
+    </ion-view>
+  </script>
+
+  <script id="new-grocerylist-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Grocery Item</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createGrocerylist(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="New item name" ng-model="task.title">
+            </label>
+          </div>
+
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Add Item</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+  </script>
+
+
+  <script id="profile.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+
+      <ion-content class="padding" overflow-scroll='true'>
+        <h2 style="text-align: center;font-family: 'Lucida Calligraphy';font-size: xx-large; color: #4b8bf4; font-weight: bolder;"> My profile </h2>
+
+        <div class="card">
+          <div class="item item-text-wrap">
+
+            <ion-item ng-show="expensee.length" ng-repeat="task in expensee|filter:{exp_category:'Target Expenditure'}" item="task"">
+
+
+            <div class="row">
+              <div class="col text-left">
+                {{task.exp_category}}
+              </div>
+              <div class="col text-right">
+                {{task.exp_target}}
+              </div>
+            </div>
+
+            </ion-item>
+          </div>
+
+        <button class="button button-full" style="font-size: large; align-content: space-between; background-color: #4b8bf4;background-color: #4b8bf4; color: #fafafa;text-decoration: none;" ng-click="newTask()">
+          Set target expenditure
+        </button>
+        </div>
+
+        <div class="card">
+          <div class="item item-text-wrap">
+
+            <ion-list>
+              <ion-item ng-repeat="item in items">
+
+
+
+                <div class="row">
+                  <div class="col text-left">
+                    Location Information
+                  </div>
+                  <div class="col text-right">
+                    {{item.name}} <br/>
+                    {{item.description}}
+                  </div>
+                </div>
+
+
+
+              </ion-item>
+            </ion-list>
+
+          </div>
+         <button class="button button-full" style="font-size: larger; align-content: space-between; background-color: #4b8bf4; color: #fafafa;text-decoration: none;" onclick="location.href = '#/location';">
+           Set favorite location
+          </button>
+        </div>
+
+      </ion-content>
+
+    </ion-view>
+  </script>
+
+
+  <script id="new-prof-category.html" type="text/ng-template">
+    <div class="modal">
+
+      <!-- Modal header bar -->
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">New Target Expenditure</h1>
+        <button class="button button-clear button-positive" ng-click="closeNewTask()">Cancel</button>
+      </ion-header-bar>
+
+      <!-- Modal content area -->
+      <ion-content>
+
+        <form ng-submit="createTarget(task)">
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter target expenditure" ng-model="task.amount">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-positive">Set target expenditure</button>
+          </div>
+        </form>
+
+      </ion-content>
+    </div>
+  </script>
+
+
+  <script id="location.html" type="text/ng-template">
+    <ion-view view-title="Monthly Expenses Tracker">
+      <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
+      </ion-nav-buttons>
+      <ion-nav-buttons side="right">
+        <button class="button button-icon button-clear ion-easel" ng-click="goToDash()"></button>
+      </ion-nav-buttons>
+
+<!--   !!!BORROWED FROM GITHUB!!!   -->
+      <div class="column">
+        <h2>Location Lookup</h2>
+        <location-lookup ng-model="lookedUpLocation" limit-to="4">
+        </location-lookup>
+
+      </div>
+      <div ng-class="{ false: 'modale',  true: 'modale&#45;&#45;show' }[isModalVisible]">
+        <div class="overlay" ng-click="toggleModal()"></div>
+        <div class="modal__contents modal&#45;&#45;transition">
+          <a class="modal__close" href="" ng-click="toggleModal()">&times;</a>
+          <br/>
+          <h3 ng-if="lookedUpLocation">Looked Up Location</h3>
+          <p ng-if="lookedUpLocation" >
+            Name: <span class="muted">{{lookedUpLocation.name}}</span><br/>
+            Description: <span class="muted">{{lookedUpLocation.description}}</span><br/>
+            <br/>
+            <button class="button button-energized" ng-click="showAdd()" onclick="location.href = '#/profile';">Add location</button>
+          </p>
+        </div>
+      </div>
+
+</div>
+    </ion-view>
+  </script>
+
+</body>
+</html>
